@@ -1,9 +1,8 @@
 require 'json'
 require 'time'
 require 'net/http'
-require_relative '../utils/change_event_header_utility'
-require_relative '../utils/client_util'
-require_relative 'pub_sub'
+require_relative '../utils/event_header_parser.rb'
+require_relative 'pub_sub.rb'
 
 class SalesforceListener
   def self.process_confirmation(event, pubsub)

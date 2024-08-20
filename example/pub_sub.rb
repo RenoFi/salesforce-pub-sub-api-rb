@@ -1,20 +1,19 @@
 require 'thread'
 require 'avro'
 require 'grpc'
-require_relative '../proto/pubsub_api_pb'
 require 'faraday'
 require 'certifi'
+require_relative '../proto/pubsub_api_services_pb.rb'
 
 class PubSub
-  attr_accessor :url,:metadata, :stub, :access_token, :topic_name, :api_version, :semaphore
+  attr_reader :url,:metadata, :stub, :access_token, :topic_name, :api_version, :semaphore
 
-  def initialize(argument_hash)
+  def initialize
     @url = ENV.fetch('SF_HOST')
-    @grpc_host = ENV.fetch['PUBSUB_HOST']
-    @grpc_port = ENV.fetch['PUBSUB_PORT']
+    @grpc_host = ENV.fetch('PUBSUB_HOST')
+    @grpc_port = ENV.fetch('PUBSUB_PORT')
     @pubsub_url = "#{@grpc_host}:#{@grpc_port}"
-    @stub = PubSubApi::PubSub::Stub.new(@pubsub_url, grpc_secure_channel_credentials)
-    @pb2 = PubSubApi
+    @stub = Eventbus::V1::PubSub::Stub.new(@pubsub_url, grpc_secure_channel_credentials)
     @topic_name = ENV.fetch('SF_TOPIC')
     @api_version = '57.0'
     @semaphore = Mutex.new
@@ -22,7 +21,7 @@ class PubSub
 
   def auth
     auth_url = ENV.fetch('SF_HOST') + ENV.fetch('SF_AUTH_ENDPOINT')
-    
+
     response = Faraday.post(auth_url) do |req|
       req.body = { grant_type: 'client_credentials', client_id: ENV.fetch('SF_CLIENT_ID'), client_secret: ENV.fetch('SF_CLIENT_SECRET') }
     end
@@ -39,16 +38,16 @@ class PubSub
   def make_fetch_request(topic, replay_type, replay_id, num_requested)
     replay_preset = case replay_type
                     when 'LATEST'
-                      PubSubApi::ReplayPreset::LATEST
+                      Eventbus::V1::ReplayPreset::LATEST
                     when 'EARLIEST'
-                      PubSubApi::ReplayPreset::EARLIEST
+                      Eventbus::V1::ReplayPreset::EARLIEST
                     when 'CUSTOM'
-                      PubSubApi::ReplayPreset::CUSTOM
+                      Eventbus::V1::ReplayPreset::CUSTOM
                     else
                       raise 'Invalid Replay Type ' + replay_type
                     end
 
-    PubSubApi::FetchRequest.new(
+    Eventbus::V1::FetchRequest.new(
       topic_name: topic,
       replay_preset: replay_preset,
       replay_id: [replay_id].pack('H*'),
@@ -84,13 +83,13 @@ class PubSub
   end
 
   def get_topic(topic_name)
-    @stub.get_topic(PubSubApi::TopicRequest.new(topic_name: topic_name), metadata: @metadata)
+    @stub.get_topic(Eventbus::V1::TopicRequest.new(topic_name: topic_name), metadata: @metadata)
   end
 
   def get_schema_json(schema_id)
     @json_schema_dict ||= {}
     @json_schema_dict[schema_id] ||= begin
-      res = @stub.get_schema(PubSubApi::SchemaRequest.new(schema_id: schema_id), metadata: @metadata)
+      res = @stub.get_schema(Eventbus::V1::SchemaRequest.new(schema_id: schema_id), metadata: @metadata)
       res.schema_json
     end
   end
@@ -116,7 +115,7 @@ class PubSub
   end
 
   def publish(topic_name, schema, schema_id)
-    @stub.publish(PubSubApi::PublishRequest.new(
+    @stub.publish(Eventbus::V1::PublishRequest.new(
       topic_name: topic_name,
       events: generate_producer_events(schema, schema_id)
     ), metadata: @metadata)
@@ -125,7 +124,7 @@ class PubSub
   private
 
   def grpc_secure_channel_credentials
-    cert_file = File.read(certifi.where)
+    cert_file = File.read(Certifi.where)
     GRPC::Core::ChannelCredentials.new(cert_file)
   end
 end
