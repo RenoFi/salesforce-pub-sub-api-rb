@@ -1,99 +1,76 @@
-require 'json'
-require 'time'
+require_relative 'decoded_event.rb'
+require_relative 'payload_builder.rb'
 
-def run
-  cdc_listener = PubSub.new
-  cdc_listener.auth
+module Example
+  class App
+    TOPIC = ENV.fetch('SF_TOPIC').freeze
+    BATCH_NUMBER_OF_EVENTS = 1
 
-  cdc_listener.subscribe('/data/Game__ChangeEvent', "LATEST", "", 1, method(:process_order))
-end
-
-def make_publish_request(schema_id, record_id, obj)
-  req = {
-    topic_name: my_publish_topic,
-    events: generate_producer_events(schema_id, record_id, obj)
-  }
-  req
-end
-
-def generate_producer_events(schema_id, record_id, obj)
-  # Codifica os dados a serem enviados no evento e cria um ProducerEvent conforme o arquivo proto.
-  schema = obj.get_schema_json(schema_id)
-  dt = Time.now + (5 * 24 * 60 * 60) # 5 dias no futuro
-  payload = {
-    "CreatedDate" => Time.now.to_i,
-    "CreatedById" => '005R0000000cw06IAA',
-    "OpptyRecordId__c" => record_id,
-    "EstimatedDeliveryDate__c" => dt.to_i,
-    "Weight__c" => 58.2
-  }
-  req = {
-    "schema_id" => schema_id,
-    "payload" => obj.encode(schema, payload.to_json)
-  }
-  [req]
-end
-
-def process_event(event, pubsub)
-  # Este é um callback passado para o método `PubSub.subscribe()`.
-  # Decodifica o payload do evento recebido e extrai o ID da oportunidade.
-  # Em seguida, chama uma função auxiliar para publicar o evento `/event/NewOrderConfirmation__e`.
-  if event[:events]
-    puts "Number of events received in FetchResponse: #{event[:events].length}"
-    
-    if event[:pending_num_requested].zero?
-      pubsub.release_subscription_semaphore
+    def initialize
+      @cdc_listener = PubSub.new
+      @cdc_listener.auth
     end
 
-    event[:events].each do |evt|
-      payload_bytes = evt[:event][:payload]
-      schema_id = evt[:event][:schema_id]
-      json_schema = pubsub.get_schema_json(schema_id)
-      decoded_event = pubsub.decode(json_schema, payload_bytes)
+    def run
+      # request/subscribe in batches from time to time or should be a long-live connection? 🤔
+      @cdc_listener.subscribe(TOPIC, "LATEST", "", BATCH_NUMBER_OF_EVENTS, method(:process_response))
+    end
 
-      puts "Received event payload: \n#{decoded_event}"
+    def process_response(response, pubsub)
+      puts "pending num requested is: #{response.pending_num_requested}"
+      pubsub.release_subscription if response.pending_num_requested.zero?
 
-      if decoded_event['ChangeEventHeader']
-        changed_fields = decoded_event['ChangeEventHeader']['changedFields']
-        converted_changed_fields = process_bitmap(avro.schema.parse(json_schema), changed_fields)
-        puts "Change Type: #{decoded_event['ChangeEventHeader']['changeType']}"
-        puts "=========== Changed Fields ============="
-        puts converted_changed_fields
-        puts "========================================="
+      puts "Number of events received #{response.events.length}"
 
-        if decoded_event['ChangeEventHeader']['changeOrigin'].include?('client=SalesforceListener')
-          puts "Skipping change event because it is an update to the delivery date by SalesforceListener."
-          return
+      response.events.each do |evt|
+        payload_blob = evt.event.payload
+        schema_id = evt.event.schema_id
+
+        decoded_event = DecodedEvent.new(pubsub.decode(schema_id, payload_blob))
+
+        puts "Received event payload: \n#{decoded_event.to_json}"
+        return if decoded_event.already_processed?
+
+        handle_event(decoded_event, schema_id)
+      end
+    end
+
+    def handle_event(decoded_event, schema_id)
+      if decoded_event.create?
+        puts "Received a CREATE event, adding the record into the app..."
+        sobject_id = decoded_event.record_ids.first
+
+        # find or initialize the object given the sobject_id and persists it
+        puts "Creating the new record in back-end with the attributes: #{decoded_event.record_fields}"
+        record_uuid = SecureRandom.uuid # just an example of a persisted id after creating the record
+
+        res = @cdc_listener.stub.publish(publish_changes(schema_id, SecureRandom.uuid), metadata: @cdc_listener.metadata)
+
+        if res.results.first.replay_id
+          puts "Event published successfully."
+        else
+          puts "Failed publishing event."
         end
       end
-
-      record_id = decoded_event['ChangeEventHeader']['recordIds'][0]
-
-      if $DEBUG
-        sleep(10)
-      end
-      puts "> Received new order! Processing order..."
-      sleep(4) if $DEBUG
-      puts "  Done! Order replicated in inventory system."
-      sleep(2) if $DEBUG
-      puts "> Calculating estimated delivery date..."
-      sleep(2) if $DEBUG
-      puts "  Done! Sending estimated delivery date back to Salesforce."
-      sleep(10) if $DEBUG
-
-      topic_info = pubsub.get_topic(topic_name: my_publish_topic)
-
-      res = pubsub.stub.Publish(make_publish_request(topic_info.schema_id, record_id, pubsub),
-                                metadata: pubsub.metadata)
-      if res.results[0].replay_id
-        puts "> Event published successfully."
-      else
-        puts "> Failed publishing event."
-      end
     end
-  else
-    puts "[#{Time.now.strftime('%b %d, %Y %l:%M%p %Z')}] The subscription is active."
-  end
 
-  event[:latest_replay_id]
+    # experiment changes - testing purposes, it will be migrate entirely to pubsub
+    def publish_changes(schema_id, record_id)
+      Eventbus::V1::PublishRequest.new(
+        topic_name: TOPIC,
+        events: generate_producer_events(schema_id, record_id)
+      )
+    end
+
+    def generate_producer_events(schema_id, record_id)
+      payload = { "Record_UUID__c" => record_id }
+
+      req = {
+        "schema_id" => schema_id,
+        "payload" => @cdc_listener.encode(schema_id, payload.to_json)
+      }
+
+      [req]
+    end
+  end
 end

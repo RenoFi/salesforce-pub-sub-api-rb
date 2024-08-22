@@ -3,10 +3,15 @@ require 'avro'
 require 'grpc'
 require 'faraday'
 require 'certifi'
+require 'ruby-limiter'
 require_relative '../proto/pubsub_api_services_pb.rb'
 
 class PubSub
-  attr_reader :url,:metadata, :stub, :access_token, :topic_name, :api_version, :semaphore, :debug
+  extend Limiter::Mixin
+
+  attr_reader :url,:metadata, :stub, :access_token, :topic_name, :semaphore, :debug
+
+  limit_method :fetch_request, rate: 60, balanced: true
 
   def initialize
     @url = ENV.fetch('SF_HOST')
@@ -15,8 +20,7 @@ class PubSub
     @pubsub_url = "#{@grpc_host}:#{@grpc_port}"
     @stub = Eventbus::V1::PubSub::Stub.new(@pubsub_url, grpc_secure_channel_credentials)
     @topic_name = ENV.fetch('SF_TOPIC')
-    @api_version = '57.0'
-    @semaphore = Mutex.new
+    @stop_subscription = false
     @debug = true
   end
 
@@ -32,11 +36,11 @@ class PubSub
     @metadata = { 'accesstoken' => @access_token, 'instanceurl' => body.fetch('instance_url'), 'tenantid' => ENV.fetch('TENANT_ID') }
   end
 
-  def release_subscription_semaphore
-    @semaphore.unlock
+  def release_subscription
+    @stop_subscription = true
   end
 
-  def make_fetch_request(topic, replay_type, replay_id, num_requested)
+  def fetch_request(topic, replay_type, replay_id, num_requested)
     replay_preset = case replay_type
                     when 'LATEST'
                       Eventbus::V1::ReplayPreset::LATEST
@@ -56,21 +60,17 @@ class PubSub
     )
   end
 
-  def fetch_req_stream(topic, replay_type, replay_id, num_requested)
+  def fetch_request_stream(topic, replay_type, replay_id, num_requested)
     Enumerator.new do |yielder|
       loop do
-        puts 'Sending Fetch Request'
-        sleep(3) if debug
-
-        @semaphore.synchronize do
-          yielder << make_fetch_request(topic, replay_type, replay_id, num_requested)
-        end
+        break if @stop_requests
+        yielder << fetch_request(topic, replay_type, replay_id, num_requested)
       end
     end
   end
 
-  def encode(schema, payload)
-    schema = Avro::Schema.parse(schema)
+  def encode(schema_id, payload)
+    schema = Avro::Schema.parse(json_schema(schema_id))
     buf = StringIO.new
     writer = Avro::IO::DatumWriter.new(schema)
     encoder = Avro::IO::BinaryEncoder.new(buf)
@@ -78,8 +78,8 @@ class PubSub
     buf.string
   end
 
-  def decode(schema, payload)
-    schema = Avro::Schema.parse(schema)
+  def decode(schema_id, payload)
+    schema = Avro::Schema.parse(json_schema(schema_id))
     buf = StringIO.new(payload)
     reader = Avro::IO::DatumReader.new(schema)
     decoder = Avro::IO::BinaryDecoder.new(buf)
@@ -90,39 +90,37 @@ class PubSub
     @stub.get_topic(Eventbus::V1::TopicRequest.new(topic_name: topic_name), metadata: @metadata)
   end
 
-  def get_schema_json(schema_id)
-    @json_schema_dict ||= {}
-    @json_schema_dict[schema_id] ||= begin
+  def json_schema(schema_id)
+    @json_schema ||= {}
+    @json_schema[schema_id] ||= begin
       res = @stub.get_schema(Eventbus::V1::SchemaRequest.new(schema_id: schema_id), metadata: @metadata)
       res.schema_json
     end
   end
 
-  def generate_producer_events(schema, schema_id)
-    payload = {
-      'CreatedDate' => Time.now.to_i,
-      'CreatedById' => '005R0000000cw06IAA',
-      'textt__c' => 'Hello World'
-    }
+  def generate_producer_events(payload, schema_id)
     [{
       schema_id: schema_id,
-      payload: encode(schema, payload)
+      payload: encode(
+        json_schema(schema_id),
+        payload
+      )
     }]
   end
 
   def subscribe(topic, replay_type, replay_id, num_requested, callback)
-    sub_stream = @stub.subscribe(fetch_req_stream(topic, replay_type, replay_id, num_requested), metadata: @metadata)
+    sub_stream = @stub.subscribe(fetch_request_stream(topic, replay_type, replay_id, num_requested), metadata: @metadata)
     puts "Subscribed to #{topic}"
-    puts sub_stream
+
     sub_stream.each do |event|
       callback.call(event, self)
     end
   end
 
-  def publish(topic_name, schema, schema_id)
+  def publish(topic_name, payload, schema_id)
     @stub.publish(Eventbus::V1::PublishRequest.new(
       topic_name: topic_name,
-      events: generate_producer_events(schema, schema_id)
+      events: generate_producer_events(payload, schema_id)
     ), metadata: @metadata)
   end
 

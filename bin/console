@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "require_all"
+require "irb"
+require 'dotenv'
+
+Dotenv.load('.env.local')
+
+require_all './'
+
+IRB.start

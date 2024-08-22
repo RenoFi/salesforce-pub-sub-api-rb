@@ -2,6 +2,7 @@ require 'avro'
 require 'bitstring'
 
 # class responsible for converting bitmaps into human-readable
+# used in DecodedEvent#changed_fields
 class EventHeaderParser
   def process_bitmap(avro_schema, bitmap_fields)
     fields = []
