@@ -1,5 +1,4 @@
 require_relative 'decoded_event.rb'
-require_relative 'payload_builder.rb'
 
 module Example
   class App
