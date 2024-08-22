@@ -6,7 +6,7 @@ require 'certifi'
 require_relative '../proto/pubsub_api_services_pb.rb'
 
 class PubSub
-  attr_reader :url,:metadata, :stub, :access_token, :topic_name, :api_version, :semaphore
+  attr_reader :url,:metadata, :stub, :access_token, :topic_name, :api_version, :semaphore, :debug
 
   def initialize
     @url = ENV.fetch('SF_HOST')
@@ -17,6 +17,7 @@ class PubSub
     @topic_name = ENV.fetch('SF_TOPIC')
     @api_version = '57.0'
     @semaphore = Mutex.new
+    @debug = true
   end
 
   def auth
@@ -58,9 +59,12 @@ class PubSub
   def fetch_req_stream(topic, replay_type, replay_id, num_requested)
     Enumerator.new do |yielder|
       loop do
-        @semaphore.lock
         puts 'Sending Fetch Request'
-        yielder << make_fetch_request(topic, replay_type, replay_id, num_requested)
+        sleep(3) if debug
+
+        @semaphore.synchronize do
+          yielder << make_fetch_request(topic, replay_type, replay_id, num_requested)
+        end
       end
     end
   end
@@ -108,7 +112,8 @@ class PubSub
 
   def subscribe(topic, replay_type, replay_id, num_requested, callback)
     sub_stream = @stub.subscribe(fetch_req_stream(topic, replay_type, replay_id, num_requested), metadata: @metadata)
-    puts "> Subscribed to #{topic}"
+    puts "Subscribed to #{topic}"
+    puts sub_stream
     sub_stream.each do |event|
       callback.call(event, self)
     end

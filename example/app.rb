@@ -1,17 +1,14 @@
-# InventoryApp.rb
-
-# Este é um cliente assinante que ouve eventos de Captura de Dados de Alteração (Change Data Capture)
-# para o objeto Opportunity e publica eventos `/event/NewOrderConfirmation__e`. 
-# Neste exemplo, este arquivo estaria hospedado em algum lugar fora do Salesforce. 
-# As condicionais `if __debug__` servem para desacelerar a velocidade do aplicativo para fins de demonstração.
-
 require 'json'
 require 'time'
 
-my_publish_topic = '/event/NewOrderConfirmation__e'
+def run
+  cdc_listener = PubSub.new
+  cdc_listener.auth
+
+  cdc_listener.subscribe('/data/Game__ChangeEvent', "LATEST", "", 1, method(:process_order))
+end
 
 def make_publish_request(schema_id, record_id, obj)
-  # Cria uma PublishRequest conforme o arquivo proto.
   req = {
     topic_name: my_publish_topic,
     events: generate_producer_events(schema_id, record_id, obj)
@@ -37,7 +34,7 @@ def generate_producer_events(schema_id, record_id, obj)
   [req]
 end
 
-def process_order(event, pubsub)
+def process_event(event, pubsub)
   # Este é um callback passado para o método `PubSub.subscribe()`.
   # Decodifica o payload do evento recebido e extrai o ID da oportunidade.
   # Em seguida, chama uma função auxiliar para publicar o evento `/event/NewOrderConfirmation__e`.
@@ -86,7 +83,6 @@ def process_order(event, pubsub)
 
       topic_info = pubsub.get_topic(topic_name: my_publish_topic)
 
-      # Publica evento NewOrderConfirmation__e
       res = pubsub.stub.Publish(make_publish_request(topic_info.schema_id, record_id, pubsub),
                                 metadata: pubsub.metadata)
       if res.results[0].replay_id
@@ -100,18 +96,4 @@ def process_order(event, pubsub)
   end
 
   event[:latest_replay_id]
-end
-
-def run(argument_dict)
-  cdc_listener = PubSub.new(argument_dict)
-  cdc_listener.auth
-
-  # Inscreva-se para eventos CDC da oportunidade
-  cdc_listener.subscribe('/data/OpportunityChangeEvent', "LATEST", "", 1, method(:process_order))
-end
-
-if __FILE__ == $0
-  argument_dict = command_line_input(ARGV)
-  logging.basicConfig
-  run(argument_dict)
 end
