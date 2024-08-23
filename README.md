@@ -12,10 +12,10 @@ The custom object that we are going to listen is already set and created.
 
 You should perform actions like: create, edit, etc... through [UI Custom Object in SF](https://renofi--stag.sandbox.lightning.force.com/lightning/o/Game__c/home) - login with staging 1pass credentials
 
-Commands
+**Commands**
 
-1. bundle install
-2. bin/console
+1. `bundle install`
+2. `bin/console`
 
 ```console
 irb:001 > example = Example::App.new
