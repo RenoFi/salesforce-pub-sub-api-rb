@@ -71,7 +71,7 @@ class PubSub
 
   def encode(schema_id, payload)
     schema = Avro::Schema.parse(json_schema(schema_id))
-    buf = StringIO.new
+    buf = StringIO.new("".force_encoding("BINARY"))
     writer = Avro::IO::DatumWriter.new(schema)
     encoder = Avro::IO::BinaryEncoder.new(buf)
     writer.write(payload, encoder)
