@@ -5,6 +5,8 @@ module Example
     TOPIC = ENV.fetch('SF_TOPIC').freeze
     BATCH_NUMBER_OF_EVENTS = 1
 
+    attr_reader :cdc_listener
+
     def initialize
       @cdc_listener = PubSub.new
       @cdc_listener.auth
@@ -36,6 +38,8 @@ module Example
 
     def handle_event(decoded_event, schema_id)
       if decoded_event.create?
+        return # publish is in WIP, this return will be removed when publish is done
+
         puts "Received a CREATE event, adding the record into the app..."
         sobject_id = decoded_event.record_ids.first
 
