@@ -9,7 +9,8 @@ require_relative '../proto/pubsub_api_services_pb.rb'
 class PubSub
   extend Limiter::Mixin
 
-  attr_reader :url,:metadata, :stub, :access_token, :topic_name, :semaphore, :debug
+  attr_accessor :current_pending_events, :lock
+  attr_reader :url,:metadata, :stub, :access_token, :topic_name
 
   limit_method :fetch_request, rate: 60, balanced: true
 
@@ -20,8 +21,7 @@ class PubSub
     @pubsub_url = "#{@grpc_host}:#{@grpc_port}"
     @stub = Eventbus::V1::PubSub::Stub.new(@pubsub_url, grpc_secure_channel_credentials)
     @topic_name = ENV.fetch('SF_TOPIC')
-    @stop_subscription = false
-    @debug = true
+    @lock = true
   end
 
   def auth
@@ -62,9 +62,15 @@ class PubSub
 
   def fetch_request_stream(topic, replay_type, replay_id, num_requested)
     Enumerator.new do |yielder|
+      # initial request
+      yielder << fetch_request(topic, replay_type, replay_id, num_requested)
+
       loop do
-        break if @stop_requests
-        yielder << fetch_request(topic, replay_type, replay_id, num_requested)
+        if request_more_events?(num_requested)
+          puts "All requested events were received, requesting a new round of events - waiting for #{num_requested} more events"
+          yielder << fetch_request(topic, replay_type, replay_id, num_requested) 
+          @lock = true
+        end
       end
     end
   end
@@ -129,5 +135,9 @@ class PubSub
   def grpc_secure_channel_credentials
     cert_file = File.read(Certifi.where)
     GRPC::Core::ChannelCredentials.new(cert_file)
+  end
+
+  def request_more_events?(num_requested)
+    current_pending_events == 0 && !lock
   end
 end

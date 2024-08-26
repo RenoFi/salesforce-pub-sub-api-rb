@@ -24,15 +24,7 @@ irb:002 > example.run
 Subscribed to .... (topic name)
 
 # events will appear here as soon as you perform any operations on the UI
-
-# to stop the subscription run the following
-irb:003 > example.cdc_listener.release_subscription
 ```
-
-## Questions
-
-1. How we are supposed to manage the `num_requested` from [FetchRequest](proto/pubsub_api.proto) and `num_pending_request` from [FetchResponse](proto/pubsub_api.proto) in a long-lived connection?
-2. Since we are always calling FetchRequest (basically once a second) the `pending_num_requested` value from the response is always incrementing and never stops
 
 ## Useful documentation
 1. [Change Data Capture docs](https://trailhead.salesforce.com/content/learn/modules/change-data-capture)

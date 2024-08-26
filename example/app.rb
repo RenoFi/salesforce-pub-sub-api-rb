@@ -4,7 +4,7 @@ require_relative 'event_mapper.rb'
 module Example
   class App
     TOPIC = ENV.fetch('SF_TOPIC').freeze
-    BATCH_NUMBER_OF_EVENTS = 1
+    BATCH_NUMBER_OF_EVENTS = 5
 
     attr_reader :cdc_listener
 
@@ -14,13 +14,12 @@ module Example
     end
 
     def run
-      # request/subscribe in batches from time to time or should be a long-live connection? 🤔
       @cdc_listener.subscribe(TOPIC, "LATEST", "", BATCH_NUMBER_OF_EVENTS, method(:process_response))
     end
 
     def process_response(response, pubsub)
-      puts "pending num requested is: #{response.pending_num_requested}"
-      pubsub.release_subscription if response.pending_num_requested.zero?
+      @cdc_listener.current_pending_events = response.pending_num_requested
+      @cdc_listener.lock = false
 
       puts "Number of events received #{response.events.length}"
 

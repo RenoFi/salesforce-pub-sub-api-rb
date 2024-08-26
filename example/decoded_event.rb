@@ -1,6 +1,12 @@
 class DecodedEvent
+  ACTIONS = %w[CREATE UPDATE DELETE UNDELETE].freeze
+
   def initialize(decoded_event)
     @decoded_event = decoded_event
+  end
+
+  ACTIONS.each do |action|
+    define_method("#{action.downcase}?") { @decoded_event['ChangeEventHeader']['changeType'] == action }
   end
 
   def to_json
@@ -9,10 +15,6 @@ class DecodedEvent
 
   def to_s
     @decoded_event.to_s
-  end
-
-  def create?
-    @decoded_event['ChangeEventHeader']['changeType'] == 'CREATE'
   end
 
   def already_processed?
