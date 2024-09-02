@@ -27,8 +27,8 @@ module Example
         payload_blob = evt.event.payload
         schema_id = evt.event.schema_id
 
-        decoded_event = BinaryHandler.decode(@cdc_listener.json_schema(schema_id), payload_blob)
-        event = Event.new(decoded_event)
+        decoded_event = BinaryHandler.new(@cdc_listener.json_schema(schema_id)).decode(payload_blob)
+        event = Event.new(decoded_event, @cdc_listener.json_schema(schema_id))
 
         handle_event(event)
       end

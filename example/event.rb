@@ -1,8 +1,11 @@
+require_relative 'binary_handler.rb'
+
 class Event
   ACTIONS = %w[CREATE UPDATE DELETE UNDELETE].freeze
 
-  def initialize(decoded_event)
+  def initialize(decoded_event, json_schema)
     @event = decoded_event
+    @json_schema = json_schema
   end
 
   ACTIONS.each do |action|
@@ -10,7 +13,7 @@ class Event
   end
 
   def to_json
-    @event
+    { decoded_event: @event, readable_changed_fields: changed_fields }.compact
   end
 
   def unprocessable?
@@ -26,9 +29,7 @@ class Event
   end
 
   def changed_fields
-    # The changedFields field contains the fields that were changed. The changedFields field is a bitmap field that isn't readable.
-    # It must be decoded first by the client. 
-    # ChangeEventHeaderUtility.new.process_bitmap(Avro::Schema.parse(json_schema), changed_fields)
-    @event['ChangeEventHeader']['changedFields']
+    bitmap_fields = @event['ChangeEventHeader']['changedFields']
+    Example::BinaryHandler.new(@json_schema).process_bitmap(bitmap_fields) unless bitmap_fields.empty?
   end
 end

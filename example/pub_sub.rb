@@ -77,7 +77,7 @@ module Example
     def generate_producer_events(payload, schema_id)
       [{
         schema_id: schema_id,
-        payload: BinaryHandler.encode(json_schema(schema_id),  payload)
+        payload: BinaryHandler.new(json_schema(schema_id)).encode(payload)
       }]
     end
 
