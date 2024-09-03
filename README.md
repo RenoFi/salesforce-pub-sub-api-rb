@@ -8,14 +8,15 @@ It provides the necessary to communicate with the Pub/Sub Salesforce API (Change
 
 This section provides the necessary instructions to run the project as well as subscribe to a topic
 
-The custom object that we are going to listen is already set and created.
+The custom object that we are going to listen should already be set and created in SF.
 
-You should perform actions like: create, edit, etc... through [UI Custom Object in SF](https://renofi--stag.sandbox.lightning.force.com/lightning/o/Game__c/home) - login with staging 1pass credentials
+You should perform actions like: create, edit, etc... through this created Custom Object in SF's UI
 
 **Commands**
 
-1. `bundle install`
-2. `bin/console`
+1. cd to the cloned repo
+2. `bundle install`
+3. `bin/console`
 
 ```console
 irb:001 > example = Example::App.new
@@ -25,6 +26,8 @@ Subscribed to .... (topic name)
 
 # events will appear here as soon as you perform any operations on the UI
 ```
+
+**Don't forget to add your own configurations in a new `.env.local` file. It's required to have it set with your SF configs/credentials**
 
 ## Useful documentation
 1. [Change Data Capture docs](https://trailhead.salesforce.com/content/learn/modules/change-data-capture)
