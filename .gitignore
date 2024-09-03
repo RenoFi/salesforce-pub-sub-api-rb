@@ -1,1 +1,16 @@
-.env.local
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+
+# rspec failure tracking
+.rspec_status
+
+# Cached rubocop config files
+.rubocop-http*
+
+.env.*
