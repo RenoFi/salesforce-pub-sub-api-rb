@@ -3,7 +3,7 @@
 # Source: proto/pubsub_api.proto for package 'eventbus.v1'
 
 require 'grpc'
-require_relative 'pubsub_api_pb.rb'
+require_relative 'pubsub_api_pb'
 
 module Eventbus
   module V1

@@ -1,5 +1,5 @@
 require 'avro'
-require_relative '../utils/event_header_parser.rb'
+require_relative '../utils/event_header_parser'
 
 module Example
   class BinaryHandler
@@ -19,7 +19,7 @@ module Example
       writer.write(payload, encoder)
       buf.string
     end
-  
+
     def decode(payload)
       buf = StringIO.new(payload)
       reader = Avro::IO::DatumReader.new(@avro_schema)

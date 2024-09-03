@@ -2,8 +2,8 @@ require 'grpc'
 require 'faraday'
 require 'certifi'
 require 'ruby-limiter'
-require_relative 'binary_handler.rb'
-require_relative '../proto/pubsub_api_services_pb.rb'
+require_relative 'binary_handler'
+require_relative '../proto/pubsub_api_services_pb'
 
 module Example
   class PubSub
@@ -29,21 +29,21 @@ module Example
 
     def fetch_request(topic, replay_type, replay_id, num_requested)
       replay_preset = case replay_type
-                      when 'LATEST'
-                        Eventbus::V1::ReplayPreset::LATEST
-                      when 'EARLIEST'
-                        Eventbus::V1::ReplayPreset::EARLIEST
-                      when 'CUSTOM'
-                        Eventbus::V1::ReplayPreset::CUSTOM
-                      else
-                        raise 'Invalid Replay Type ' + replay_type
-                      end
+      when 'LATEST'
+        Eventbus::V1::ReplayPreset::LATEST
+      when 'EARLIEST'
+        Eventbus::V1::ReplayPreset::EARLIEST
+      when 'CUSTOM'
+        Eventbus::V1::ReplayPreset::CUSTOM
+      else
+        fail "Invalid Replay Type #{replay_type}"
+      end
 
       Eventbus::V1::FetchRequest.new(
         topic_name: topic,
-        replay_preset: replay_preset,
+        replay_preset:,
         replay_id: [replay_id].pack('H*'),
-        num_requested: num_requested
+        num_requested:
       )
     end
 
@@ -53,30 +53,29 @@ module Example
         yielder << fetch_request(topic, replay_type, replay_id, num_requested)
 
         loop do
-          if request_more_events?(num_requested)
-            puts "All requested events were received, requesting a new round of events - waiting for #{num_requested} more events"
-            yielder << fetch_request(topic, replay_type, replay_id, num_requested) 
-            @lock = true
-          end
+          next unless request_more_events?(num_requested)
+          puts "All requested events were received, requesting a new round of events - waiting for #{num_requested} more events"
+          yielder << fetch_request(topic, replay_type, replay_id, num_requested)
+          @lock = true
         end
       end
     end
 
     def get_topic(topic_name)
-      @stub.get_topic(Eventbus::V1::TopicRequest.new(topic_name: topic_name), metadata:)
+      @stub.get_topic(Eventbus::V1::TopicRequest.new(topic_name:), metadata:)
     end
 
     def json_schema(schema_id)
       @json_schema ||= {}
       @json_schema[schema_id] ||= begin
-        res = @stub.get_schema(Eventbus::V1::SchemaRequest.new(schema_id: schema_id), metadata:)
+        res = @stub.get_schema(Eventbus::V1::SchemaRequest.new(schema_id:), metadata:)
         res.schema_json
       end
     end
 
     def generate_producer_events(payload, schema_id)
       [{
-        schema_id: schema_id,
+        schema_id:,
         payload: BinaryHandler.new(json_schema(schema_id)).encode(payload)
       }]
     end
@@ -90,7 +89,7 @@ module Example
 
     def publish(topic_name, payload, schema_id)
       @stub.publish(
-        Eventbus::V1::PublishRequest.new(topic_name: topic_name, events: generate_producer_events(payload, schema_id)),
+        Eventbus::V1::PublishRequest.new(topic_name:, events: generate_producer_events(payload, schema_id)),
         metadata:
       )
     end
@@ -102,7 +101,7 @@ module Example
       GRPC::Core::ChannelCredentials.new(cert_file)
     end
 
-    def request_more_events?(num_requested)
+    def request_more_events?(_num_requested)
       current_pending_events == 0 && !lock
     end
   end

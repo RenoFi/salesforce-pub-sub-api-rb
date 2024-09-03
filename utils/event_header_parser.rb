@@ -53,7 +53,7 @@ class EventHeaderParser
   end
 
   def convert_hexbinary_to_bitset(bitmap)
-    Bitstring.new(hex: bitmap[2..-1]).to_s.reverse
+    Bitstring.new(hex: bitmap[2..]).to_s.reverse
   end
 
   def append_parent_name(parent_field_name, full_field_names)

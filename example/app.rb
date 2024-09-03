@@ -1,5 +1,5 @@
-require_relative 'event.rb'
-require_relative 'binary_handler.rb'
+require_relative 'event'
+require_relative 'binary_handler'
 
 module Example
   class App
@@ -17,7 +17,7 @@ module Example
       @cdc_listener.subscribe(TOPIC, "LATEST", "", BATCH_NUMBER_OF_EVENTS, method(:process_response))
     end
 
-    def process_response(response, pubsub)
+    def process_response(response, _pubsub)
       @cdc_listener.current_pending_events = response.pending_num_requested
       @cdc_listener.lock = false
 
@@ -36,7 +36,7 @@ module Example
 
     def handle_event(event)
       puts "Received event payload: \n#{event.to_json}"
-      return if event.unprocessable?
+      nil if event.unprocessable?
     end
   end
 end

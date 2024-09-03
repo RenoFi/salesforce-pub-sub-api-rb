@@ -1,12 +1,17 @@
 source 'https://rubygems.org'
 
 gem 'avro_turf'
+gem 'bitstring'
+gem 'certifi'
+gem 'dotenv'
+gem 'faraday'
 gem 'grpc'
 gem 'grpc-tools'
-gem 'faraday'
-gem 'certifi'
-gem 'bitstring'
+gem 'pry'
+gem 'rake'
+gem 'require_all'
+gem 'rspec'
+gem 'rubocop'
+gem 'rubocop-rake'
+gem 'rubocop-rspec'
 gem 'ruby-limiter'
-gem 'dotenv', groups: [:development, :test]
-gem 'require_all', groups: [:development]
-gem 'pry', groups: [:development]
