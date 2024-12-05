@@ -1,3 +1,4 @@
+require 'rspec'
 require 'bundler/setup'
 require 'pry'
 
