@@ -53,7 +53,7 @@ module Example
         yielder << fetch_request(topic, replay_type, replay_id, num_requested)
 
         loop do
-          next unless request_more_events?(num_requested)
+          next unless request_more_events?
           puts "All requested events were received, requesting a new round of events - waiting for #{num_requested} more events"
           yielder << fetch_request(topic, replay_type, replay_id, num_requested)
           @lock = true
@@ -84,7 +84,7 @@ module Example
       sub_stream = @stub.subscribe(fetch_request_stream(topic, replay_type, replay_id, num_requested), metadata:)
       puts "Subscribed to #{topic}"
 
-      sub_stream.each { |event| callback.call(event, self) }
+      sub_stream.each { |event| callback.call(event) }
     end
 
     def publish(topic_name, payload, schema_id)
@@ -101,7 +101,7 @@ module Example
       GRPC::Core::ChannelCredentials.new(cert_file)
     end
 
-    def request_more_events?(_num_requested)
+    def request_more_events?
       current_pending_events == 0 && !lock
     end
   end

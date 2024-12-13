@@ -17,7 +17,7 @@ module Example
       @cdc_listener.subscribe(TOPIC, "LATEST", "", BATCH_NUMBER_OF_EVENTS, method(:process_response))
     end
 
-    def process_response(response, _pubsub)
+    def process_response(response)
       @cdc_listener.current_pending_events = response.pending_num_requested
       @cdc_listener.lock = false
 
