@@ -11,6 +11,7 @@
 .rspec_status
 
 # Cached rubocop config files
+.rubocop-remote*
 .rubocop-http*
 
 .env.*
