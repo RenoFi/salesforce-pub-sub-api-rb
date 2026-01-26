@@ -2,76 +2,75 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.3)
-    avro (1.12.0)
+    avro (1.12.1)
       multi_json (~> 1.0)
-    avro_turf (1.18.0)
+    avro_turf (1.20.1)
       avro (>= 1.11.3, < 1.13)
-      excon (~> 0.104)
-    bigdecimal (3.2.1)
+      excon (>= 0.104, < 2)
+    bigdecimal (4.0.1)
     bitstring (1.0.0)
       versionomy (>= 0.3.0)
     blockenspiel (0.5.0)
     certifi (2018.01.18)
     coderay (1.1.3)
     diff-lcs (1.6.2)
-    dotenv (3.1.8)
-    excon (0.112.0)
-    faraday (2.13.1)
+    dotenv (3.2.0)
+    excon (1.3.2)
+      logger
+    faraday (2.14.0)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
-    faraday-net_http (3.4.0)
-      net-http (>= 0.5.0)
-    google-protobuf (4.31.1)
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
+    google-protobuf (4.33.4)
       bigdecimal
       rake (>= 13)
-    google-protobuf (4.31.1-x86_64-linux-gnu)
-      bigdecimal
-      rake (>= 13)
-    googleapis-common-protos-types (1.20.0)
-      google-protobuf (>= 3.18, < 5.a)
-    grpc (1.72.0)
+    googleapis-common-protos-types (1.22.0)
+      google-protobuf (~> 4.26)
+    grpc (1.76.0)
       google-protobuf (>= 3.25, < 5.0)
       googleapis-common-protos-types (~> 1.0)
-    grpc (1.72.0-x86_64-linux)
-      google-protobuf (>= 3.25, < 5.0)
-      googleapis-common-protos-types (~> 1.0)
-    grpc-tools (1.72.0)
-    json (2.12.2)
+    grpc-tools (1.76.0)
+    io-console (0.8.2)
+    json (2.18.0)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)
     method_source (1.1.0)
-    multi_json (1.15.0)
-    net-http (0.6.0)
-      uri
+    multi_json (1.19.1)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     parallel (1.27.0)
-    parser (3.3.8.0)
+    parser (3.3.10.1)
       ast (~> 2.4.1)
       racc
-    prism (1.4.0)
-    pry (0.15.2)
+    prism (1.8.0)
+    pry (0.16.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
+      reline (>= 0.6.0)
     racc (1.8.1)
     rainbow (3.1.1)
-    rake (13.3.0)
-    regexp_parser (2.10.0)
+    rake (13.3.1)
+    regexp_parser (2.11.3)
+    reline (0.6.3)
+      io-console (~> 0.5)
     require_all (3.0.0)
-    rspec (3.13.1)
+    rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
       rspec-mocks (~> 3.13.0)
-    rspec-core (3.13.4)
+    rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.5)
+    rspec-mocks (3.13.7)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-support (3.13.4)
-    rubocop (1.75.8)
+    rspec-support (3.13.6)
+    rubocop (1.82.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -79,30 +78,29 @@ GEM
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 2.9.3, < 3.0)
-      rubocop-ast (>= 1.44.0, < 2.0)
+      rubocop-ast (>= 1.48.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.44.1)
+    rubocop-ast (1.49.0)
       parser (>= 3.3.7.2)
-      prism (~> 1.4)
+      prism (~> 1.7)
     rubocop-rake (0.7.1)
       lint_roller (~> 1.1)
       rubocop (>= 1.72.1)
-    rubocop-rspec (3.6.0)
+    rubocop-rspec (3.9.0)
       lint_roller (~> 1.1)
-      rubocop (~> 1.72, >= 1.72.1)
+      rubocop (~> 1.81)
     ruby-limiter (2.3.0)
     ruby-progressbar (1.13.0)
-    unicode-display_width (3.1.4)
-      unicode-emoji (~> 4.0, >= 4.0.4)
-    unicode-emoji (4.0.4)
-    uri (1.0.4)
+    unicode-display_width (3.2.0)
+      unicode-emoji (~> 4.1)
+    unicode-emoji (4.2.0)
+    uri (1.1.1)
     versionomy (0.5.0)
       blockenspiel (~> 0.5)
 
 PLATFORMS
   ruby
-  x86_64-linux
 
 DEPENDENCIES
   avro_turf
@@ -121,5 +119,57 @@ DEPENDENCIES
   rubocop-rspec
   ruby-limiter
 
+CHECKSUMS
+  ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
+  avro (1.12.1) sha256=e2a32e605e935f9196d590bb193d1fa13b83d169303b811ecb614e67ad59ac43
+  avro_turf (1.20.1) sha256=3962f5fe05a5e6db65bd6d41943d0b0153636751c4dcb5ded4ab4d7d2ddd9abb
+  bigdecimal (4.0.1) sha256=8b07d3d065a9f921c80ceaea7c9d4ae596697295b584c296fe599dd0ad01c4a7
+  bitstring (1.0.0) sha256=64a5c05c742019af09881b1058f58dc8be176310724f4d3c18ebd43877956fbd
+  blockenspiel (0.5.0) sha256=a8f7b3e06aab850f2deed3fe7b4037e522640bc9d61d76d9ce17175b880ee0c0
+  certifi (2018.01.18) sha256=d5aff04a27045255a4829823496a974dc1cc2c04a777675b3056b0c0952ce9e3
+  coderay (1.1.3) sha256=dc530018a4684512f8f38143cd2a096c9f02a1fc2459edcfe534787a7fc77d4b
+  diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
+  dotenv (3.2.0) sha256=e375b83121ea7ca4ce20f214740076129ab8514cd81378161f11c03853fe619d
+  excon (1.3.2) sha256=a089babe98638e58042a7d542b2bbd183304527e33d612b6dde22fa491a544a5
+  faraday (2.14.0) sha256=8699cfe5d97e55268f2596f9a9d5a43736808a943714e3d9a53e6110593941cd
+  faraday-net_http (3.4.2) sha256=f147758260d3526939bf57ecf911682f94926a3666502e24c69992765875906c
+  google-protobuf (4.33.4) sha256=86921935b023ed0d872d6e84382e79016c91689be0520d614c74426778f13c16
+  googleapis-common-protos-types (1.22.0) sha256=f97492b77bd6da0018c860d5004f512fe7cd165554d7019a8f4df6a56fbfc4c7
+  grpc (1.76.0) sha256=112416fa42153aee440fd1b975de4b2bf746656df071bace97c197a6b5575598
+  grpc-tools (1.76.0) sha256=1b943edf89fd5d125c3476d657b4d89ac85adc6144c5e00a10ed750631f1228e
+  io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
+  json (2.18.0) sha256=b10506aee4183f5cf49e0efc48073d7b75843ce3782c68dbeb763351c08fd505
+  language_server-protocol (3.17.0.5) sha256=fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc
+  lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
+  logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
+  method_source (1.1.0) sha256=181301c9c45b731b4769bc81e8860e72f9161ad7d66dd99103c9ab84f560f5c5
+  multi_json (1.19.1) sha256=7aefeff8f2c854bf739931a238e4aea64592845e0c0395c8a7d2eea7fdd631b7
+  net-http (0.9.1) sha256=25ba0b67c63e89df626ed8fac771d0ad24ad151a858af2cc8e6a716ca4336996
+  parallel (1.27.0) sha256=4ac151e1806b755fb4e2dc2332cbf0e54f2e24ba821ff2d3dcf86bf6dc4ae130
+  parser (3.3.10.1) sha256=06f6a725d2cd91e5e7f2b7c32ba143631e1f7c8ae2fb918fc4cebec187e6a688
+  prism (1.8.0) sha256=84453a16ef5530ea62c5f03ec16b52a459575ad4e7b9c2b360fd8ce2c39c1254
+  pry (0.16.0) sha256=d76c69065698ed1f85e717bd33d7942c38a50868f6b0673c636192b3d1b6054e
+  racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
+  rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
+  rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
+  regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
+  reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
+  require_all (3.0.0) sha256=937853faa2833388eab551107bf7bf87c6bba6b4800bac5ce469eda7b6a9fed0
+  rspec (3.13.2) sha256=206284a08ad798e61f86d7ca3e376718d52c0bc944626b2349266f239f820587
+  rspec-core (3.13.6) sha256=a8823c6411667b60a8bca135364351dda34cd55e44ff94c4be4633b37d828b2d
+  rspec-expectations (3.13.5) sha256=33a4d3a1d95060aea4c94e9f237030a8f9eae5615e9bd85718fe3a09e4b58836
+  rspec-mocks (3.13.7) sha256=0979034e64b1d7a838aaaddf12bf065ea4dc40ef3d4c39f01f93ae2c66c62b1c
+  rspec-support (3.13.6) sha256=2e8de3702427eab064c9352fe74488cc12a1bfae887ad8b91cba480ec9f8afb2
+  rubocop (1.82.1) sha256=09f1a6a654a960eda767aebea33e47603080f8e9c9a3f019bf9b94c9cab5e273
+  rubocop-ast (1.49.0) sha256=49c3676d3123a0923d333e20c6c2dbaaae2d2287b475273fddee0c61da9f71fd
+  rubocop-rake (0.7.1) sha256=3797f2b6810c3e9df7376c26d5f44f3475eda59eb1adc38e6f62ecf027cbae4d
+  rubocop-rspec (3.9.0) sha256=8fa70a3619408237d789aeecfb9beef40576acc855173e60939d63332fdb55e2
+  ruby-limiter (2.3.0) sha256=a8c247e14bc092c749d67bcd2a2def052580447da02b04612a2baa88cb154464
+  ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
+  unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
+  unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
+  uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
+  versionomy (0.5.0) sha256=636c8f9174c884034d1b24354a479c579b32e7839d897729b97e079aff251444
+
 BUNDLED WITH
-   2.6.9
+  4.0.4
