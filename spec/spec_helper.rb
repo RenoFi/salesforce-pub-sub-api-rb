@@ -1,6 +1,6 @@
-require 'rspec'
-require 'bundler/setup'
-require 'pry'
+require "rspec"
+require "bundler/setup"
+require "pry"
 
 RSpec.configure do |config|
   config.disable_monkey_patching!

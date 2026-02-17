@@ -1,9 +1,9 @@
-require 'grpc'
-require 'faraday'
-require 'certifi'
-require 'ruby-limiter'
-require_relative 'binary_handler'
-require_relative '../proto/pubsub_api_services_pb'
+require "grpc"
+require "faraday"
+require "certifi"
+require "ruby-limiter"
+require_relative "binary_handler"
+require_relative "../proto/pubsub_api_services_pb"
 
 module Example
   class PubSub
@@ -18,22 +18,22 @@ module Example
     limit_method :fetch_request, rate: 60, balanced: true
 
     def initialize
-      @grpc_host = ENV.fetch('PUBSUB_HOST')
-      @grpc_port = ENV.fetch('PUBSUB_PORT')
+      @grpc_host = ENV.fetch("PUBSUB_HOST")
+      @grpc_port = ENV.fetch("PUBSUB_PORT")
       @pubsub_url = "#{@grpc_host}:#{@grpc_port}"
       @stub = Eventbus::V1::PubSub::Stub.new(@pubsub_url, grpc_secure_channel_credentials)
-      @topic_name = ENV.fetch('SF_TOPIC')
+      @topic_name = ENV.fetch("SF_TOPIC")
       @salesforce_client = SalesforceClient.new
       @lock = true
     end
 
     def fetch_request(topic, replay_type, replay_id, num_requested)
       replay_preset = case replay_type
-      when 'LATEST'
+      when "LATEST"
         Eventbus::V1::ReplayPreset::LATEST
-      when 'EARLIEST'
+      when "EARLIEST"
         Eventbus::V1::ReplayPreset::EARLIEST
-      when 'CUSTOM'
+      when "CUSTOM"
         Eventbus::V1::ReplayPreset::CUSTOM
       else
         fail "Invalid Replay Type #{replay_type}"
@@ -42,7 +42,7 @@ module Example
       Eventbus::V1::FetchRequest.new(
         topic_name: topic,
         replay_preset:,
-        replay_id: [replay_id].pack('H*'),
+        replay_id: [replay_id].pack("H*"),
         num_requested:
       )
     end

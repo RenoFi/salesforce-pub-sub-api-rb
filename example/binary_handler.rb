@@ -1,5 +1,5 @@
-require 'avro'
-require_relative '../utils/event_header_parser'
+require "avro"
+require_relative "../utils/event_header_parser"
 
 module Example
   class BinaryHandler

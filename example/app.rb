@@ -1,9 +1,9 @@
-require_relative 'event'
-require_relative 'binary_handler'
+require_relative "event"
+require_relative "binary_handler"
 
 module Example
   class App
-    TOPIC = ENV.fetch('SF_TOPIC').freeze
+    TOPIC = ENV.fetch("SF_TOPIC").freeze
     BATCH_NUMBER_OF_EVENTS = 5
 
     attr_reader :cdc_listener

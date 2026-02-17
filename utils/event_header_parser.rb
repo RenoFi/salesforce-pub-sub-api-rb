@@ -1,5 +1,5 @@
-require 'avro'
-require 'bitstring'
+require "avro"
+require "bitstring"
 
 class Bitstring
   def initialize(hex: nil)
@@ -7,7 +7,7 @@ class Bitstring
   end
 
   def to_s
-    @hex.to_i(16).to_s(2).rjust(@hex.size * 4, '0')
+    @hex.to_i(16).to_s(2).rjust(@hex.size * 4, "0")
   end
 end
 
@@ -36,7 +36,7 @@ class EventHeaderParser
 
   def get_fieldnames_from_bitstring(bitmap)
     binary_string = convert_hexbinary_to_bitset(bitmap)
-    indexes = find('1', binary_string)
+    indexes = find("1", binary_string)
 
     indexes.map { |index| @avro_schema.fields[index].name }
   end
@@ -46,7 +46,7 @@ class EventHeaderParser
     parent_field = @avro_schema.fields[parent_index.to_i]
     child_schema = get_value_schema(parent_field.type)
 
-    return [] unless child_schema.type == 'record'
+    return [] unless child_schema.type == "record"
 
     full_field_names = get_fieldnames_from_bitstring(bitmap_string, child_schema)
     append_parent_name(parent_field.name, full_field_names)
