@@ -1,0 +1,88 @@
+version: 2
+
+registries:
+  ruby-github:
+    type: rubygems-server
+    url: https://rubygems.pkg.github.com/renofi
+    token: ${{secrets.RUBYGEMS_PKG_GITHUB_TOKEN}}
+
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    registries:
+      - ruby-github
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "UTC"
+    cooldown:
+      default-days: 2
+      include:
+        - "*"
+    commit-message:
+      prefix: "[dependabot]"
+    groups:
+      ruby-minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "automerge"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "UTC"
+    cooldown:
+      default-days: 2
+      include:
+        - "*"
+    commit-message:
+      prefix: "[dependabot]"
+    groups:
+      js-minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "UTC"
+    cooldown:
+      default-days: 2
+    commit-message:
+      prefix: "[dependabot]"
+    groups:
+      actions-minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "automerge"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
